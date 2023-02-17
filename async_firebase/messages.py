@@ -310,7 +310,7 @@ class Message:
     fcm_options: platform independent options for features provided by the FCM SDKs
     """
 
-    token: t.Optional[str]
+    token: t.Optional[str] = None
     data: t.Dict[str, str] = field(default_factory=dict)
     notification: t.Optional[Notification] = field(default=None)
     android: t.Optional[AndroidConfig] = field(default=None)

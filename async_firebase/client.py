@@ -459,14 +459,13 @@ class AsyncFirebaseClient:
 
     async def push(  # pylint: disable=too-many-locals
         self,
-        device_token: str,
-        *,
+        device_token: t.Optional[str] = None,
+        topic: t.Optional[str] = None,
         android: t.Optional[AndroidConfig] = None,
         apns: t.Optional[APNSConfig] = None,
         condition: t.Optional[str] = None,
         data: t.Optional[t.Dict[str, str]] = None,
         notification: t.Optional[Notification] = None,
-        topic: t.Optional[str] = None,
         webpush: t.Optional[WebpushConfig] = None,
         fcm_options: t.Optional[FcmOptions] = None,
         dry_run: bool = False,
@@ -475,13 +474,13 @@ class AsyncFirebaseClient:
         Send push notification.
 
         :param device_token: device token allows to send targeted notifications to a particular instance of app.
+        :param topic: name of the Firebase topic to which the message should be sent.
         :param android: as instance of ``messages.AndroidConfig`` that contains Android-specific options.
         :param apns: as instance of ``messages.APNSConfig`` that contains iOS-specific options.
         :param condition: the Firebase condition to which the message should be sent.
         :param data: a dictionary of data fields. All keys and values in the dictionary must be strings.
         :param notification: an instance of ``messages.Notification`` that contains a notification that can be included
             in a resulting message.
-        :param topic: name of the Firebase topic to which the message should be sent.
         :param webpush: an instance of ``messages.WebpushConfig``.
         :fcm_options: an instance of ``messages.FcmOptions`` that contains platform independent options
             for features provided by the FCM SDKs.
@@ -525,6 +524,9 @@ class AsyncFirebaseClient:
                     }
                 }
         """
+        assert device_token or topic, 'Device token or topic is required'
+        assert not (device_token and topic), 'Set only one argument: device token or topic'
+
         message = Message(
             token=device_token,
             data=data or {},
