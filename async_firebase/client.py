@@ -27,6 +27,7 @@ from async_firebase.messages import (
     APNSPayload,
     Aps,
     ApsAlert,
+    FcmOptions,
     FcmPushMulticastResponse,
     FcmPushResponse,
     Message,
@@ -467,6 +468,7 @@ class AsyncFirebaseClient:
         notification: t.Optional[Notification] = None,
         topic: t.Optional[str] = None,
         webpush: t.Optional[WebpushConfig] = None,
+        fcm_options: t.Optional[FcmOptions] = None,
         dry_run: bool = False,
     ) -> FcmPushResponse:
         """
@@ -481,6 +483,8 @@ class AsyncFirebaseClient:
             in a resulting message.
         :param topic: name of the Firebase topic to which the message should be sent.
         :param webpush: an instance of ``messages.WebpushConfig``.
+        :fcm_options: an instance of ``messages.FcmOptions`` that contains platform independent options
+            for features provided by the FCM SDKs.
         :param dry_run: indicating whether to run the operation in dry run mode (optional). Flag for testing the request
             without actually delivering the message. Default to ``False``.
 
@@ -530,6 +534,7 @@ class AsyncFirebaseClient:
             apns=apns,
             topic=topic,
             condition=condition,
+            fcm_options=fcm_options
         )
 
         push_notification = self.assemble_push_notification(apns_config=apns, dry_run=dry_run, message=message)

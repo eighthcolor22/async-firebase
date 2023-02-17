@@ -281,6 +281,16 @@ class WebpushConfig:
 
 
 @dataclass
+class FcmOptions:
+    """
+    Platform independent options for features provided by the FCM SDKs
+    Arguments:
+        analytics_label: Label associated with the message's analytics data.
+    """
+    analytics_label: str
+
+
+@dataclass
 class Message:
     """
     A common message that can be sent via Firebase.
@@ -297,6 +307,7 @@ class Message:
     token: the registration token of the device to which the message should be sent.
     topic: name of the Firebase topic to which the message should be sent (optional).
     condition: the Firebase condition to which the message should be sent (optional).
+    fcm_options: platform independent options for features provided by the FCM SDKs
     """
 
     token: t.Optional[str]
@@ -307,6 +318,7 @@ class Message:
     apns: t.Optional[APNSConfig] = field(default=None)
     topic: t.Optional[str] = None
     condition: t.Optional[str] = None
+    fcm_options: t.Optional[str] = None
 
 
 @dataclass
