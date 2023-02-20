@@ -461,9 +461,9 @@ class AsyncFirebaseClient:
         self,
         device_token: t.Optional[str] = None,
         topic: t.Optional[str] = None,
+        condition: t.Optional[str] = None,
         android: t.Optional[AndroidConfig] = None,
         apns: t.Optional[APNSConfig] = None,
-        condition: t.Optional[str] = None,
         data: t.Optional[t.Dict[str, str]] = None,
         notification: t.Optional[Notification] = None,
         webpush: t.Optional[WebpushConfig] = None,
@@ -524,8 +524,10 @@ class AsyncFirebaseClient:
                     }
                 }
         """
-        assert device_token or topic, 'Device token or topic is required'
-        assert not (device_token and topic), 'Set only one argument: device token or topic'
+        targets = [device_token, topic, condition]
+        assert any(targets), 'Device token or topic or condition is required'
+        assert len([_t for _t in targets if _t]) == 1, \
+            'Set only one target: device token or topic or condition'
 
         message = Message(
             token=device_token,
