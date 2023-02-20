@@ -3,7 +3,7 @@
 """
 
 import typing as t
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 from async_firebase.errors import AsyncFirebaseError
 
@@ -291,7 +291,28 @@ class FcmOptions:
 
 
 @dataclass
-class Message:
+class MessagePayload:
+    """
+    An object that contains payload information without target fields.
+    Attributes:
+    token: the registration token of the device to which the message should be sent.
+    topic: name of the Firebase topic to which the message should be sent (optional).
+    condition: the Firebase condition to which the message should be sent (optional).
+    """
+    data: t.Dict[str, str] = field(default_factory=dict)
+    notification: t.Optional[Notification] = field(default=None)
+    android: t.Optional[AndroidConfig] = field(default=None)
+    webpush: t.Optional[WebpushConfig] = field(default=None)
+    apns: t.Optional[APNSConfig] = field(default=None)
+    fcm_options: t.Optional[FcmOptions] = None
+
+    def as_dict(self) -> dict:
+        data = asdict(self)
+        return data
+
+
+@dataclass
+class Message(MessagePayload):
     """
     A common message that can be sent via Firebase.
 
@@ -309,16 +330,9 @@ class Message:
     condition: the Firebase condition to which the message should be sent (optional).
     fcm_options: platform independent options for features provided by the FCM SDKs
     """
-
     token: t.Optional[str] = None
-    data: t.Dict[str, str] = field(default_factory=dict)
-    notification: t.Optional[Notification] = field(default=None)
-    android: t.Optional[AndroidConfig] = field(default=None)
-    webpush: t.Optional[WebpushConfig] = field(default=None)
-    apns: t.Optional[APNSConfig] = field(default=None)
     topic: t.Optional[str] = None
     condition: t.Optional[str] = None
-    fcm_options: t.Optional[FcmOptions] = None
 
 
 @dataclass
