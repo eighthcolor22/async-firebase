@@ -562,7 +562,7 @@ class AsyncFirebaseClient:
         data: t.Optional[t.Dict[str, str]] = None,
         notification: t.Optional[Notification] = None,
         webpush: t.Optional[WebpushConfig] = None,
-        fcm_options: t.Optional[dict] = None,
+        fcm_options: t.Optional[FcmOptions] = None,
         dry_run: bool = False,
     ) -> FcmPushMulticastResponse:
         """

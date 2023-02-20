@@ -318,7 +318,7 @@ class Message:
     apns: t.Optional[APNSConfig] = field(default=None)
     topic: t.Optional[str] = None
     condition: t.Optional[str] = None
-    fcm_options: t.Optional[str] = None
+    fcm_options: t.Optional[FcmOptions] = None
 
 
 @dataclass
