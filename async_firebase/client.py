@@ -562,6 +562,7 @@ class AsyncFirebaseClient:
         data: t.Optional[t.Dict[str, str]] = None,
         notification: t.Optional[Notification] = None,
         webpush: t.Optional[WebpushConfig] = None,
+        fcm_options: t.Optional[dict] = None,
         dry_run: bool = False,
     ) -> FcmPushMulticastResponse:
         """
@@ -575,6 +576,8 @@ class AsyncFirebaseClient:
         :param notification: an instance of ``messages.Notification`` that contains a notification that can be included
             in a resulting message.
         :param webpush: an instance of ``messages.WebpushConfig``.
+        :fcm_options: an instance of ``messages.FcmOptions`` that contains platform independent options
+            for features provided by the FCM SDKs.
         :param dry_run: indicating whether to run the operation in dry run mode (optional). Flag for testing the request
             without actually delivering the message. Default to ``False``.
         """
@@ -603,6 +606,7 @@ class AsyncFirebaseClient:
                     android=android,
                     webpush=webpush,
                     apns=apns,
+                    fcm_options=fcm_options
                 ),
             )
             body = self._serialize_batch_request(
