@@ -527,7 +527,7 @@ class AsyncFirebaseClient:
         targets = [device_token, topic, condition]
         if not any(targets):
             raise ValueError('Device token or topic or condition is required')
-        if not len([_t for _t in targets if _t]) != 1:
+        if len([_t for _t in targets if _t]) != 1:
             raise ValueError('Set only one target: device token or topic or condition')
 
         message = Message(
