@@ -372,6 +372,19 @@ class FcmPushResponse:
         return self.message_id is not None and not self.exception
 
 
+class FcmTopicManagementResponse:
+    """The response received from a topic management operation."""
+
+    def __init__(self, results: t.Optional[list] = None, exception: t.Optional[AsyncFirebaseError] = None):
+        self.results = results
+        self.exception = exception
+
+    @property
+    def success(self) -> bool:
+        """A boolean indicating if the request was successful."""
+        return isinstance(self.results, list) and not all(self.results)
+
+
 class FcmPushMulticastResponse:
     """The response received from a batch request to the FCM API.
 

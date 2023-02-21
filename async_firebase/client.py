@@ -38,12 +38,15 @@ from async_firebase.messages import (
     WebpushFCMOptions,
     WebpushNotification,
     WebpushNotificationAction,
+    FcmTopicManagementResponse,
 )
 from async_firebase.utils import (
     FcmPushMulticastResponseHandler,
     FcmPushResponseHandler,
     cleanup_firebase_message,
     serialize_mime_message,
+    TopicManagementResponse,
+    FcmResponseHandler,
 )
 
 DEFAULT_TTL = 604800
@@ -63,6 +66,9 @@ class AsyncFirebaseClient:
     TOKEN_URL: str = "https://oauth2.googleapis.com/token"
     FCM_ENDPOINT: str = "/v1/projects/{project_id}/messages:send"
     FCM_BATCH_ENDPOINT: str = "/batch"
+    IID_URL = 'https://iid.googleapis.com'
+    TOPIC_ADD_ACTION = 'iid/v1:batchAdd'
+    TOPIC_REMOVE_ACTION = 'iid/v1:batchRemove'
     # A list of accessible OAuth 2.0 scopes can be found https://developers.google.com/identity/protocols/oauth2/scopes.
     SCOPES: t.List[str] = [
         "https://www.googleapis.com/auth/cloud-platform",
@@ -655,11 +661,11 @@ class AsyncFirebaseClient:
     async def _send_request(
             self,
             uri: str,
-            response_handler: t.Union[FcmPushResponseHandler, FcmPushMulticastResponseHandler],
+            response_handler: t.Union[FcmResponseHandler],
             json_payload: t.Optional[t.Dict[str, t.Any]] = None,
             headers: t.Optional[t.Dict[str, str]] = None,
             content: t.Union[str, bytes, t.Iterable[bytes], t.AsyncIterable[bytes], None] = None,
-    ) -> t.Union[FcmPushResponse, FcmPushMulticastResponse]:
+    ) -> t.Union[FcmPushResponse, FcmPushMulticastResponse, FcmTopicManagementResponse]:
         """
         Sends an HTTP call using the ``httpx`` library.
 
@@ -684,7 +690,6 @@ class AsyncFirebaseClient:
                     headers=headers or await self._prepare_headers(),
                     content=content,
                 )
-
                 raw_fcm_response.raise_for_status()
             except httpx.HTTPError as exc:
                 response = response_handler.handle_error(exc)
@@ -697,3 +702,73 @@ class AsyncFirebaseClient:
                 response = response_handler.handle_response(raw_fcm_response)
 
         return response
+
+    async def make_topic_management_request(
+            self,
+            device_tokens: t.List[str],
+            topic_name: str,
+            action: str
+    ) -> TopicManagementResponse:
+        uri = f'{self.IID_URL}/{action}'
+        payload = {
+            'to': f'/topics/{topic_name}',
+            'registration_tokens': device_tokens,
+        }
+        headers = await self._prepare_headers()
+        headers.update(
+            {'access_token_auth': 'true'}
+        )
+        response = await self._send_request(
+            uri=uri,
+            json_payload=payload,
+            headers=headers,
+            response_handler=TopicManagementResponse(),
+        )
+        return response
+
+    async def subscribe_devices_to_topic(
+            self, device_tokens: t.List[str], topic_name: str
+    ) -> TopicManagementResponse:
+        """
+        Subscribes a list of device ids to a topic
+
+        Args:
+            device_tokens (list): ids to be subscribed
+            topic_name (str): name of topic
+
+        Returns:
+            True: if operation succeeded
+
+        Raises:
+            Exception: data sent to server was incorrectly formatted
+            Exception: an error occured on the server
+        """
+
+        return await self.make_topic_management_request(
+            device_tokens=device_tokens,
+            topic_name=topic_name,
+            action=self.TOPIC_ADD_ACTION
+        )
+
+    async def unsubscribe_devices_from_topic(
+            self, device_tokens: t.List[str], topic_name: str
+    ) -> TopicManagementResponse:
+        """
+        Unsubscribes a list of devices from a topic
+
+        Args:
+            device_tokens (list): ids to be unsubscribed
+            topic_name (str): name of topic
+
+        Returns:
+            True: if operation succeeded
+
+        Raises:
+            Exception: data sent to server was incorrectly formatted
+            Exception: an error occured on the server
+        """
+        return await self.make_topic_management_request(
+            device_tokens=device_tokens,
+            topic_name=topic_name,
+            action=self.TOPIC_REMOVE_ACTION
+        )
