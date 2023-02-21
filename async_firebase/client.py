@@ -45,7 +45,7 @@ from async_firebase.utils import (
     FcmPushResponseHandler,
     cleanup_firebase_message,
     serialize_mime_message,
-    TopicManagementResponse,
+    TopicManagementResponseHandler,
     FcmResponseHandler,
 )
 
@@ -75,9 +75,9 @@ class AsyncFirebaseClient:
     ]
 
     def __init__(
-            self,
-            credentials: t.Optional[service_account.Credentials] = None,
-            scopes: t.Optional[t.List[str]] = None,
+        self,
+        credentials: t.Optional[service_account.Credentials] = None,
+        scopes: t.Optional[t.List[str]] = None,
     ) -> None:
         """
         :param credentials: instance of ``google.oauth2.service_account.Credentials``.
@@ -98,10 +98,10 @@ class AsyncFirebaseClient:
 
     @staticmethod
     def assemble_push_notification(
-            *,
-            apns_config: t.Optional[APNSConfig],
-            message: Message,
-            dry_run: bool,
+        *,
+        apns_config: t.Optional[APNSConfig],
+        message: Message,
+        dry_run: bool,
     ) -> t.Dict[str, t.Any]:
         """
         Assemble ``messages.PushNotification`` object properly.
@@ -172,25 +172,25 @@ class AsyncFirebaseClient:
 
     @staticmethod
     def build_android_config(  # pylint: disable=too-many-locals
-            *,
-            priority: str,
-            ttl: t.Union[int, timedelta] = DEFAULT_TTL,
-            collapse_key: t.Optional[str] = None,
-            restricted_package_name: t.Optional[str] = None,
-            data: t.Optional[t.Dict[str, t.Any]] = None,
-            title: t.Optional[str] = None,
-            body: t.Optional[str] = None,
-            icon: t.Optional[str] = None,
-            color: t.Optional[str] = None,
-            sound: t.Optional[str] = None,
-            tag: t.Optional[str] = None,
-            click_action: t.Optional[str] = None,
-            body_loc_key: t.Optional[str] = None,
-            body_loc_args: t.Optional[t.List[str]] = None,
-            title_loc_key: t.Optional[str] = None,
-            title_loc_args: t.Optional[t.List[str]] = None,
-            channel_id: t.Optional[str] = None,
-            notification_count: t.Optional[int] = None,
+        *,
+        priority: str,
+        ttl: t.Union[int, timedelta] = DEFAULT_TTL,
+        collapse_key: t.Optional[str] = None,
+        restricted_package_name: t.Optional[str] = None,
+        data: t.Optional[t.Dict[str, t.Any]] = None,
+        title: t.Optional[str] = None,
+        body: t.Optional[str] = None,
+        icon: t.Optional[str] = None,
+        color: t.Optional[str] = None,
+        sound: t.Optional[str] = None,
+        tag: t.Optional[str] = None,
+        click_action: t.Optional[str] = None,
+        body_loc_key: t.Optional[str] = None,
+        body_loc_args: t.Optional[t.List[str]] = None,
+        title_loc_key: t.Optional[str] = None,
+        title_loc_args: t.Optional[t.List[str]] = None,
+        channel_id: t.Optional[str] = None,
+        notification_count: t.Optional[int] = None,
     ) -> AndroidConfig:
         """
         Constructs AndroidConfig that will be used to customize the messages that are sent to Android device.
@@ -255,26 +255,26 @@ class AsyncFirebaseClient:
 
     @staticmethod
     def build_apns_config(  # pylint: disable=too-many-locals
-            *,
-            priority: str,
-            ttl: int = DEFAULT_TTL,
-            apns_topic: t.Optional[str] = None,
-            collapse_key: t.Optional[str] = None,
-            title: t.Optional[str] = None,
-            alert: t.Optional[str] = None,
-            badge: t.Optional[int] = None,
-            sound: t.Optional[str] = None,
-            content_available: bool = False,
-            category: t.Optional[str] = None,
-            thread_id: t.Optional[str] = None,
-            mutable_content: bool = True,
-            custom_data: t.Optional[t.Dict[str, t.Any]] = None,
-            loc_key: t.Optional[str] = None,
-            loc_args: t.Optional[t.List[str]] = None,
-            title_loc_key: t.Optional[str] = None,
-            title_loc_args: t.Optional[t.List[str]] = None,
-            action_loc_key: t.Optional[str] = None,
-            launch_image: t.Optional[str] = None,
+        *,
+        priority: str,
+        ttl: int = DEFAULT_TTL,
+        apns_topic: t.Optional[str] = None,
+        collapse_key: t.Optional[str] = None,
+        title: t.Optional[str] = None,
+        alert: t.Optional[str] = None,
+        badge: t.Optional[int] = None,
+        sound: t.Optional[str] = None,
+        content_available: bool = False,
+        category: t.Optional[str] = None,
+        thread_id: t.Optional[str] = None,
+        mutable_content: bool = True,
+        custom_data: t.Optional[t.Dict[str, t.Any]] = None,
+        loc_key: t.Optional[str] = None,
+        loc_args: t.Optional[t.List[str]] = None,
+        title_loc_key: t.Optional[str] = None,
+        title_loc_args: t.Optional[t.List[str]] = None,
+        action_loc_key: t.Optional[str] = None,
+        launch_image: t.Optional[str] = None,
     ) -> APNSConfig:
         """
         Constructs APNSConfig that will be used to customize the messages that are sent to iOS device.
@@ -349,25 +349,25 @@ class AsyncFirebaseClient:
 
     @staticmethod
     def build_webpush_config(  # pylint: disable=too-many-locals
-            *,
-            data: t.Dict[str, str],
-            headers: t.Optional[t.Dict[str, str]] = None,
-            title: t.Optional[str] = None,
-            body: t.Optional[str] = None,
-            icon: t.Optional[str] = None,
-            actions: t.Optional[t.List[WebpushNotificationAction]] = None,
-            badge: t.Optional[str] = None,
-            direction: t.Optional[str] = "auto",
-            image: t.Optional[str] = None,
-            language: t.Optional[str] = None,
-            renotify: t.Optional[bool] = False,
-            require_interaction: t.Optional[bool] = None,
-            silent: t.Optional[bool] = False,
-            tag: t.Optional[str] = None,
-            timestamp_millis: t.Optional[int] = None,
-            vibrate: t.Optional[str] = None,
-            custom_data: t.Optional[t.Dict[str, str]] = None,
-            link: t.Optional[str] = None,
+        *,
+        data: t.Dict[str, str],
+        headers: t.Optional[t.Dict[str, str]] = None,
+        title: t.Optional[str] = None,
+        body: t.Optional[str] = None,
+        icon: t.Optional[str] = None,
+        actions: t.Optional[t.List[WebpushNotificationAction]] = None,
+        badge: t.Optional[str] = None,
+        direction: t.Optional[str] = "auto",
+        image: t.Optional[str] = None,
+        language: t.Optional[str] = None,
+        renotify: t.Optional[bool] = False,
+        require_interaction: t.Optional[bool] = None,
+        silent: t.Optional[bool] = False,
+        tag: t.Optional[str] = None,
+        timestamp_millis: t.Optional[int] = None,
+        vibrate: t.Optional[str] = None,
+        custom_data: t.Optional[t.Dict[str, str]] = None,
+        link: t.Optional[str] = None,
     ) -> WebpushConfig:
         """
         Constructs WebpushConfig that will be used to customize the messages that are sent user agents.
@@ -467,17 +467,17 @@ class AsyncFirebaseClient:
         }
 
     async def push(  # pylint: disable=too-many-locals
-            self,
-            device_token: t.Optional[str] = None,
-            topic: t.Optional[str] = None,
-            condition: t.Optional[str] = None,
-            android: t.Optional[AndroidConfig] = None,
-            apns: t.Optional[APNSConfig] = None,
-            data: t.Optional[t.Dict[str, str]] = None,
-            notification: t.Optional[Notification] = None,
-            webpush: t.Optional[WebpushConfig] = None,
-            fcm_options: t.Optional[FcmOptions] = None,
-            dry_run: bool = False,
+        self,
+        device_token: t.Optional[str] = None,
+        topic: t.Optional[str] = None,
+        condition: t.Optional[str] = None,
+        android: t.Optional[AndroidConfig] = None,
+        apns: t.Optional[APNSConfig] = None,
+        data: t.Optional[t.Dict[str, str]] = None,
+        notification: t.Optional[Notification] = None,
+        webpush: t.Optional[WebpushConfig] = None,
+        fcm_options: t.Optional[FcmOptions] = None,
+        dry_run: bool = False,
     ) -> FcmPushResponse:
         """
         Send push notification.
@@ -599,7 +599,8 @@ class AsyncFirebaseClient:
         messages = [(token, collected_message) for token in device_tokens]
         return await self.send_all(messages=messages, dry_run=dry_run)
 
-    async def send_all(self,
+    async def send_all(
+        self,
         messages: t.List[t.Tuple[DEVICE_TOKEN, MessagePayload]],
         dry_run: bool = False
     ):
@@ -659,12 +660,12 @@ class AsyncFirebaseClient:
         return batch_response
 
     async def _send_request(
-            self,
-            uri: str,
-            response_handler: t.Union[FcmResponseHandler],
-            json_payload: t.Optional[t.Dict[str, t.Any]] = None,
-            headers: t.Optional[t.Dict[str, str]] = None,
-            content: t.Union[str, bytes, t.Iterable[bytes], t.AsyncIterable[bytes], None] = None,
+        self,
+        uri: str,
+        response_handler: t.Union[FcmResponseHandler],
+        json_payload: t.Optional[t.Dict[str, t.Any]] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        content: t.Union[str, bytes, t.Iterable[bytes], t.AsyncIterable[bytes], None] = None,
     ) -> t.Union[FcmPushResponse, FcmPushMulticastResponse, FcmTopicManagementResponse]:
         """
         Sends an HTTP call using the ``httpx`` library.
@@ -704,11 +705,11 @@ class AsyncFirebaseClient:
         return response
 
     async def make_topic_management_request(
-            self,
-            device_tokens: t.List[str],
-            topic_name: str,
-            action: str
-    ) -> TopicManagementResponse:
+        self,
+        device_tokens: t.List[str],
+        topic_name: str,
+        action: str
+    ) -> FcmTopicManagementResponse:
         uri = f'{self.IID_URL}/{action}'
         payload = {
             'to': f'/topics/{topic_name}',
@@ -722,13 +723,15 @@ class AsyncFirebaseClient:
             uri=uri,
             json_payload=payload,
             headers=headers,
-            response_handler=TopicManagementResponse(),
+            response_handler=TopicManagementResponseHandler(),
         )
         return response
 
     async def subscribe_devices_to_topic(
-            self, device_tokens: t.List[str], topic_name: str
-    ) -> TopicManagementResponse:
+        self,
+        device_tokens: t.List[str],
+        topic_name: str
+    ) -> FcmTopicManagementResponse:
         """
         Subscribes a list of device ids to a topic
 
@@ -751,8 +754,10 @@ class AsyncFirebaseClient:
         )
 
     async def unsubscribe_devices_from_topic(
-            self, device_tokens: t.List[str], topic_name: str
-    ) -> TopicManagementResponse:
+        self,
+        device_tokens: t.List[str],
+        topic_name: str
+    ) -> FcmTopicManagementResponse:
         """
         Unsubscribes a list of devices from a topic
 

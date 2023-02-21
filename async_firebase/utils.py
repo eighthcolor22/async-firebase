@@ -322,7 +322,7 @@ class FcmPushMulticastResponseHandler(FcmResponseHandler[FcmPushMulticastRespons
         return responses
 
 
-class TopicManagementResponse(FcmResponseHandler[FcmPushResponse]):
+class TopicManagementResponseHandler(FcmResponseHandler[FcmPushResponse]):
     def handle_error(self, error: t.Union[httpx.HTTPError, dict] = None) -> FcmTopicManagementResponse:
         exc = (
             (isinstance(error, httpx.HTTPStatusError) and self._handle_fcm_error(error))
@@ -356,5 +356,3 @@ class TopicManagementResponse(FcmResponseHandler[FcmPushResponse]):
                 return FcmTopicManagementResponse(results=results)
             return self.handle_error(error)
         return self.handle_error()
-
-
