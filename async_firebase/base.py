@@ -37,6 +37,9 @@ class AsyncClientBase:
     TOKEN_URL: str = "https://oauth2.googleapis.com/token"
     FCM_ENDPOINT: str = "/v1/projects/{project_id}/messages:send"
     FCM_BATCH_ENDPOINT: str = "/batch"
+    IID_URL = 'https://iid.googleapis.com'
+    TOPIC_ADD_ACTION = 'iid/v1:batchAdd'
+    TOPIC_REMOVE_ACTION = 'iid/v1:batchRemove'
     # A list of accessible OAuth 2.0 scopes can be found https://developers.google.com/identity/protocols/oauth2/scopes.
     SCOPES: t.List[str] = [
         "https://www.googleapis.com/auth/cloud-platform",

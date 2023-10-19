@@ -37,12 +37,14 @@ from async_firebase.messages import (
     WebpushFCMOptions,
     WebpushNotification,
     WebpushNotificationAction,
+    FcmTopicManagementResponse,
 )
 from async_firebase.utils import (
     FCMBatchResponseHandler,
     FCMResponseHandler,
     cleanup_firebase_message,
     serialize_mime_message,
+    TopicManagementResponseHandler,
 )
 
 DEFAULT_TTL = 604800
@@ -493,3 +495,77 @@ class AsyncFirebaseClient(AsyncClientBase):
         if not isinstance(batch_response, FCMBatchResponse):
             raise ValueError("Wrong return type, perhaps because of a response handler misuse.")
         return batch_response
+
+    async def make_topic_management_request(
+        self,
+        device_tokens: t.List[str],
+        topic_name: str,
+        action: str
+    ) -> FcmTopicManagementResponse:
+        uri = f'{self.IID_URL}/{action}'
+        payload = {
+            'to': f'/topics/{topic_name}',
+            'registration_tokens': device_tokens,
+        }
+        headers = await self.prepare_headers()
+        headers.update(
+            {'access_token_auth': 'true'}
+        )
+        response = await self.send_request(
+            uri=uri,
+            json_payload=payload,
+            headers=headers,
+            response_handler=TopicManagementResponseHandler(),
+        )
+        return response
+
+    async def subscribe_devices_to_topic(
+        self,
+        device_tokens: t.List[str],
+        topic_name: str
+    ) -> FcmTopicManagementResponse:
+        """
+        Subscribes a list of device ids to a topic
+
+        Args:
+            device_tokens (list): ids to be subscribed
+            topic_name (str): name of topic
+
+        Returns:
+            True: if operation succeeded
+
+        Raises:
+            Exception: data sent to server was incorrectly formatted
+            Exception: an error occured on the server
+        """
+
+        return await self.make_topic_management_request(
+            device_tokens=device_tokens,
+            topic_name=topic_name,
+            action=self.TOPIC_ADD_ACTION
+        )
+
+    async def unsubscribe_devices_from_topic(
+        self,
+        device_tokens: t.List[str],
+        topic_name: str
+    ) -> FcmTopicManagementResponse:
+        """
+        Unsubscribes a list of devices from a topic
+
+        Args:
+            device_tokens (list): ids to be unsubscribed
+            topic_name (str): name of topic
+
+        Returns:
+            True: if operation succeeded
+
+        Raises:
+            Exception: data sent to server was incorrectly formatted
+            Exception: an error occured on the server
+        """
+        return await self.make_topic_management_request(
+            device_tokens=device_tokens,
+            topic_name=topic_name,
+            action=self.TOPIC_REMOVE_ACTION
+        )

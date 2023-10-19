@@ -23,7 +23,11 @@ from async_firebase.errors import (
     UnknownError,
     UnregisteredError,
 )
-from async_firebase.messages import FCMBatchResponse, FCMResponse
+from async_firebase.messages import (
+    FCMBatchResponse,
+    FCMResponse,
+    FcmTopicManagementResponse,
+)
 
 
 def remove_null_values(dict_value: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
@@ -320,3 +324,39 @@ class FCMBatchResponseHandler(FCMResponseHandlerBase[FCMBatchResponse]):
             responses.append(resp)
 
         return responses
+
+
+class TopicManagementResponseHandler(FCMResponseHandlerBase[FCMResponse]):
+    def handle_error(self, error: t.Union[httpx.HTTPError, dict] = None) -> FcmTopicManagementResponse:
+        exc = (
+            (isinstance(error, httpx.HTTPStatusError) and self._handle_fcm_error(error))
+            or (isinstance(error, httpx.HTTPError) and self._handle_request_error(error))
+            or (isinstance(error, dict) and self._handle_topic_management_error(error))
+            or AsyncFirebaseError(
+                code=FcmErrorCode.UNKNOWN.value,
+                message="Unexpected error has happened when hitting the FCM API",
+                cause=error,
+            )
+        )
+
+        return FcmTopicManagementResponse(exception=exc)
+
+    @staticmethod
+    def _handle_topic_management_error(error: dict):
+        if error.get('error') == 'INVALID_ARGUMENT':
+            return errors.InvalidArgumentError(message='Invalid argument')
+        return UnknownError(message="Unknown error while making a remote service call: {error}")
+
+    def handle_response(self, response: httpx.Response) -> FcmTopicManagementResponse:
+        response = response.json()
+        results = response.get('results')
+
+        if isinstance(results, list):
+            error = next(
+                (item for item in results if 'error' in item),
+                None
+            )
+            if not error:
+                return FcmTopicManagementResponse(results=results)
+            return self.handle_error(error)
+        return self.handle_error()
