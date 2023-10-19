@@ -280,6 +280,17 @@ class WebpushConfig:
     fcm_options: t.Optional[WebpushFCMOptions] = field(default=None)
 
 
+# Note: deprecated by firebase.
+@dataclass
+class FcmOptions:
+    """
+    Platform independent options for features provided by the FCM SDKs
+    Arguments:
+        analytics_label: Label associated with the message's analytics data.
+    """
+    analytics_label: str
+
+
 @dataclass
 class Message:
     """
@@ -307,6 +318,7 @@ class Message:
     apns: t.Optional[APNSConfig] = field(default=None)
     topic: t.Optional[str] = None
     condition: t.Optional[str] = None
+    fcm_options: t.Optional[FcmOptions] = None
 
 
 @dataclass
@@ -329,6 +341,7 @@ class MulticastMessage:
     android: t.Optional[AndroidConfig] = field(default=None)
     webpush: t.Optional[WebpushConfig] = field(default=None)
     apns: t.Optional[APNSConfig] = field(default=None)
+    fcm_options: t.Optional[FcmOptions] = None
 
 
 @dataclass
@@ -395,3 +408,66 @@ class FCMBatchResponse:
     @property
     def failure_count(self):
         return len(self.responses) - self.success_count
+
+
+class FcmTopicManagementResponse:
+    """The response received from a topic management operation."""
+
+    def __init__(self, results: t.Optional[list] = None, exception: t.Optional[AsyncFirebaseError] = None):
+        self.results = results
+        self.exception = exception
+
+    @property
+    def success(self) -> bool:
+        """A boolean indicating if the request was successful."""
+        return isinstance(self.results, list) and not all(self.results)
+
+
+class ErrorInfo:
+    """An error encountered when performing a topic management operation."""
+
+    def __init__(self, index, reason):
+        self._index = index
+        self._reason = reason
+
+    @property
+    def index(self):
+        """Index of the registration token to which this error is related to."""
+        return self._index
+
+    @property
+    def reason(self):
+        """String describing the nature of the error."""
+        return self._reason
+
+
+# class FcmTopicManagementResponse:
+#     """The response received from a topic management operation."""
+#
+#     def __init__(self, resp, exception):
+#         if not isinstance(resp, dict) or 'results' not in resp:
+#             raise ValueError('Unexpected topic management response: {0}.'.format(resp))
+#         self._success_count = 0
+#         self._failure_count = 0
+#         self._errors = []
+#         for index, result in enumerate(resp['results']):
+#             if 'error' in result:
+#                 self._failure_count += 1
+#                 self._errors.append(ErrorInfo(index, result['error']))
+#             else:
+#                 self._success_count += 1
+#
+#     @property
+#     def success_count(self):
+#         """Number of tokens that were successfully subscribed or unsubscribed."""
+#         return self._success_count
+#
+#     @property
+#     def failure_count(self):
+#         """Number of tokens that could not be subscribed or unsubscribed due to errors."""
+#         return self._failure_count
+#
+#     @property
+#     def errors(self):
+#         """A list of ``messaging.ErrorInfo`` objects (possibly empty)."""
+#         return self._errors
