@@ -345,7 +345,7 @@ class TopicManagementResponseHandler(FCMResponseHandlerBase[FCMResponse]):
     def _handle_topic_management_error(error: dict):
         if error.get('error') == 'INVALID_ARGUMENT':
             return errors.InvalidArgumentError(message='Invalid argument')
-        return UnknownError(message="Unknown error while making a remote service call: {error}")
+        return UnknownError(message=f'Unknown error while making a remote service call: {error}')
 
     def handle_response(self, response: httpx.Response) -> FcmTopicManagementResponse:
         response = response.json()
